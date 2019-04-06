@@ -15,13 +15,22 @@ import nltk
 from nltk.corpus import stopwords
 from nltk import DefaultTagger, UnigramTagger, BigramTagger, TrigramTagger
 import nltk.tag.sequential
+import random
 stop = stopwords.words('english')
 NOUNS = ['NN', 'NNS', 'NNP', 'NNPS']
+VERBS = ['VB', 'VBG', 'VBD', 'VBN', 'VBP', 'VBZ']
+ADJ = ['JJ']
+POS = [NOUNS, VERBS, ADJ]
+
+def get_objects(parsed, pos):
+    # Get objeccts for given pos 
+    objects = [p[0] for p in parsed if p[0] != 'i' and p[1] in POS[pos]]
+    return objects
 
 """
     Given a phrase, return the object of the sentence
 """
-def identify_objects(phrase, tagger):
+def identify_objects(phrase, tagger, pos):
     # Tokenizes all words in phrase
     words = nltk.tokenize.word_tokenize(phrase) 
     # Set all to lowercase, remove stopwords
@@ -31,15 +40,12 @@ def identify_objects(phrase, tagger):
     # Determines most frequent nouns. pos_tag does not identify nouns
     # as well as tagger does. Therefore, these aren't REALLY the most
     # frequent nouns
-    most_freq_nouns = [w for w, c in fdist.most_common(10) if \
-        nltk.pos_tag([w])[0][1] in NOUNS]
-    #print("mfn: " + str(most_freq_nouns))
-    # Give proper POS tag to most_freq_nouns
-    parsed = tagger.tag(most_freq_nouns)  
-    #print("Parsed: " + str(parsed))
+    parsed = tagger.tag(words)
+    #print("parsed: " + str(parsed))
     # Determine most probable object nouns
-    object_nouns = [p[0] for p in parsed if p[0] != 'i' and  p[1] in NOUNS]
-    return object_nouns
+    #print("pos: " + str(pos))
+    objects = get_objects(parsed, pos)
+    return objects
 
 
 """
@@ -56,7 +62,8 @@ def main():
     trigram_tagger = TrigramTagger(train_sents, backoff=t2)
     while(1):
         phrase = input("Enter rap phrase: ")
-        objects = identify_objects(phrase, trigram_tagger) 
+        pos = random.randint(0,2) 
+        objects = identify_objects(phrase, trigram_tagger, pos) 
         print("Objects: " + str(objects))
 
 main()
