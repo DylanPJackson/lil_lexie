@@ -23,7 +23,7 @@ def countLines(file):
 
 
 
-def makeSentence(cfg):
+def makeSentenceWithNoun(cfg):
     word = cfg.sentence
     if(cfg.isNoun == True):
 
@@ -35,10 +35,15 @@ def makeSentence(cfg):
 
     return cfg.sentence
 
+def makeSentenceWithVerb(cfg):
+    pass
+
 def main():
     print("dog")
     cfg = CFG()
-    print(makeSentence(cfg))
+    print(makeSentenceWithNoun(cfg))
+    cfg = CFG()
+    
 
 
 if __name__ == "__main__":
