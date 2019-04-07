@@ -40,9 +40,10 @@ def makeSentenceWithVerb(cfg):
 
 def main():
     print("dog")
-    cfg = CFG()
-    print(makeSentenceWithNoun(cfg))
-    cfg = CFG()
+    cfg1 = CFG()
+    print(makeSentenceWithNoun(cfg1))
+    cfg2 = CFG()
+    print(makeSentenceWithVerb(cfg2))
     
 
 
