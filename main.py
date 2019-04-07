@@ -23,8 +23,7 @@ api = datamuse.Datamuse()
 stop = stopwords.words('english')
 NOUNS = ['NN', 'NNS', 'NNP', 'NNPS']
 VERBS = ['VB', 'VBG', 'VBD', 'VBN', 'VBP', 'VBZ']
-ADJ = ['JJ']
-POS = [NOUNS, VERBS, ADJ]
+POS = [NOUNS, VERBS]
 
 def countLines(file):
     with open(file) as f:
@@ -83,10 +82,11 @@ def makeCouplet(subject, tagger):
         antonyms = api.words(rel_ant=subject[0], max=20)
         print("antonyms: " + str(antonyms))
         if antonyms == []:
-            return 
-        shuffle(antonyms)
+            return 1 
+        best_antonyms = antonyms[:3]
+        shuffle(best_antonyms)
         done = 0
-        for antonym in antonyms:
+        for antonym in best_antonyms:
             a = antonym.get("word")
             v_pos = tagger.tag([a])
             #print("v_pos: " + str(v_pos))
@@ -94,7 +94,6 @@ def makeCouplet(subject, tagger):
                 #print("1")
             rhymes = api.words(rel_rhy=v_pos[0][0])
             top_rhymes = rhymes[:5]
-            shuffle(top_rhymes)
             print("rhymes: " + str(top_rhymes))
             for rhyme in top_rhymes:
                 r = rhyme.get("word")
@@ -128,14 +127,15 @@ def main():
     while(1):
         phrase = input("Enter rap phrase: ")
         while(1):
-            pos = random.randint(0,2) 
+            pos = random.randint(0,1) 
             objects = identify_objects(phrase, trigram_tagger, pos) 
             print("objects: " + str(objects))
             if objects == []:
                 print("Couldn't find any POS for that one")
                 continue
             subject = objects[0]
-            makeCouplet(subject, trigram_tagger) 
+            if(makeCouplet(subject, trigram_tagger)):
+                continue 
             break
 
 main()
