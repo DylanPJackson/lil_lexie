@@ -61,14 +61,6 @@ def identify_objects(phrase, tagger, pos):
     objects = get_objects(parsed, pos)
     return objects
 
-def makeSentenceWithNoun(noun, indicator):
-    verbPhrase = verbPhraseList[random.randint(1, len(verbPhraseList)) -1]
-    pronoun = pronounList[random.randint(1, len(pronounList)) -1]
-    if indicator:
-         return "You'll " + verbPhrase + " " + pronoun + " " + noun 
-    else:
-        return "I'll " + verbPhrase + " " + pronoun + " " + noun
-
 def makeCouplet(subject, tagger):
     if subject[1] in NOUNS:
         #print("subject[1] in NOUNS: " + str(subject[1]))
@@ -86,6 +78,40 @@ def makeCouplet(subject, tagger):
                 #print(str(makeSentenceWithNoun(subject[0], 0)) + \
                     #makeSentenceWithNoun(pos[0][0], 1)) 
                 break
+    elif subject[1] in VERBS:
+        # I'll [verb_phrase] [pronoun] [rhymed_noun], rest 
+        antonyms = api.words(rel_ant=subject[0], max=20)
+        print("antonyms: " + str(antonyms))
+        if antonyms == []:
+            return 
+        shuffle(antonyms)
+        done = 0
+        for antonym in antonyms:
+            a = antonym.get("word")
+            v_pos = tagger.tag([a])
+            #print("v_pos: " + str(v_pos))
+            #if v_pos[0][1] in VERBS:
+                #print("1")
+            rhymes = api.words(rel_rhy=v_pos[0][0])
+            top_rhymes = rhymes[:5]
+            shuffle(top_rhymes)
+            print("rhymes: " + str(top_rhymes))
+            for rhyme in top_rhymes:
+                r = rhyme.get("word")
+                n_pos = tagger.tag([r])
+                if n_pos[0][1] in NOUNS:
+                    #print("2")
+                    verbPhrase = verbPhraseList[random.randint(1, len(verbPhraseList)) - 1]
+                    pronoun = pronounList[random.randint(1, len(pronounList)) - 1]
+                    print("I'll " + verbPhrase + " " + pronoun + " " + n_pos[0][0] \
+                        + " You " + subject[0] + " I " + v_pos[0][0]) 
+                    done = 1
+                    break
+            if(done):
+                break
+                    
+    else:
+        print("subject: " + str(subject))
 
 """
     Main functionality idk
@@ -101,11 +127,15 @@ def main():
     trigram_tagger = TrigramTagger(train_sents, backoff=t2)
     while(1):
         phrase = input("Enter rap phrase: ")
-        #pos = random.randint(0,2) 
-        pos = 0
-        objects = identify_objects(phrase, trigram_tagger, pos) 
-        #print("Objects: " + str(objects))
-        subject = objects[0]
-        makeCouplet(subject, trigram_tagger) 
+        while(1):
+            pos = random.randint(0,2) 
+            objects = identify_objects(phrase, trigram_tagger, pos) 
+            print("objects: " + str(objects))
+            if objects == []:
+                print("Couldn't find any POS for that one")
+                continue
+            subject = objects[0]
+            makeCouplet(subject, trigram_tagger) 
+            break
 
 main()
