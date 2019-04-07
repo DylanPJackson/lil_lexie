@@ -18,8 +18,20 @@ import nltk.tag.sequential
 import random
 from random import shuffle
 from datamuse import datamuse
+import pickle
 
 api = datamuse.Datamuse()
+"""train_sents = nltk.corpus.brown.tagged_sents()
+train_sents += nltk.corpus.conll2000.tagged_sents()
+train_sents += nltk.corpus.treebank.tagged_sents()    
+t0 = DefaultTagger('NN')
+t1 = UnigramTagger(train_sents, backoff=t0)
+t2 = BigramTagger(train_sents, backoff=t1)
+trigram_tagger = TrigramTagger(train_sents, backoff=t2)"""
+tagger_f = open("naivebayes.pickle", "rb")
+trigram_tagger = pickle.load(tagger_f)
+tagger_f.close()
+
 stop = stopwords.words('english')
 NOUNS = ['NN', 'NNS', 'NNP', 'NNPS']
 VERBS = ['VB', 'VBG', 'VBD', 'VBN', 'VBP', 'VBZ']
@@ -73,16 +85,15 @@ def makeCouplet(subject, tagger):
                 verb = verbList[random.randint(1, len(verbList)) - 1]
                 pronoun = pronounList[random.randint(1, len(pronounList)) -1]
                 verbPhrase = verbPhraseList[random.randint(1, len(verbPhraseList)) -1]
-                print(verb + " " + pronoun + " " + subject[0] + " " + verbPhrase + " " + pos[0][0])
+                return(verb + " " + pronoun + " " + subject[0] + " " + verbPhrase + " " + pos[0][0])
                 #print(str(makeSentenceWithNoun(subject[0], 0)) + \
                     #makeSentenceWithNoun(pos[0][0], 1)) 
-                break
     elif subject[1] in VERBS:
         # I'll [verb_phrase] [pronoun] [rhymed_noun], rest 
         antonyms = api.words(rel_ant=subject[0], max=20)
-        print("antonyms: " + str(antonyms))
+        #print("antonyms: " + str(antonyms))
         if antonyms == []:
-            return 1 
+            return 1
         best_antonyms = antonyms[:3]
         shuffle(best_antonyms)
         done = 0
@@ -94,7 +105,7 @@ def makeCouplet(subject, tagger):
                 #print("1")
             rhymes = api.words(rel_rhy=v_pos[0][0])
             top_rhymes = rhymes[:5]
-            print("rhymes: " + str(top_rhymes))
+            #print("rhymes: " + str(top_rhymes))
             for rhyme in top_rhymes:
                 r = rhyme.get("word")
                 n_pos = tagger.tag([r])
@@ -102,28 +113,21 @@ def makeCouplet(subject, tagger):
                     #print("2")
                     verbPhrase = verbPhraseList[random.randint(1, len(verbPhraseList)) - 1]
                     pronoun = pronounList[random.randint(1, len(pronounList)) - 1]
-                    print("I'll " + verbPhrase + " " + pronoun + " " + n_pos[0][0] \
+                    return("I'll " + verbPhrase + " " + pronoun + " " + n_pos[0][0] \
                         + " You " + subject[0] + " I " + v_pos[0][0]) 
-                    done = 1
-                    break
-            if(done):
-                break
+                    #done = 1
+            #if(done):
+            #    break
                     
     else:
-        print("subject: " + str(subject))
+        #print("subject: " + str(subject))
+        pass
 
 """
     Main functionality idk
 """
 def main():
     # Gather training data and train tagger, making TrigramTagger
-    train_sents = nltk.corpus.brown.tagged_sents()
-    train_sents += nltk.corpus.conll2000.tagged_sents()
-    train_sents += nltk.corpus.treebank.tagged_sents()    
-    t0 = DefaultTagger('NN')
-    t1 = UnigramTagger(train_sents, backoff=t0)
-    t2 = BigramTagger(train_sents, backoff=t1)
-    trigram_tagger = TrigramTagger(train_sents, backoff=t2)
     while(1):
         phrase = input("Enter rap phrase: ")
         while(1):
@@ -134,8 +138,10 @@ def main():
                 print("Couldn't find any POS for that one")
                 continue
             subject = objects[0]
-            if(makeCouplet(subject, trigram_tagger)):
-                continue 
-            break
+            response = makeCouplet(subject, trigram_tagger)
+            if(response == 1):
+                continue
+            else:
+                return response 
 
-main()
+print(main())
