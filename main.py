@@ -42,10 +42,10 @@ def countLines(file):
         lines = f.read().splitlines()
     return lines
 
-pronounList = countLines("pronouns.txt")
-verbPhraseList = countLines("verb_phrases.txt")
-nounList = countLines("nouns.txt")
-verbList = countLines("verbs.txt")
+pronounList = countLines("pronouns")
+verbPhraseList = countLines("verb phrases")
+nounList = countLines("nouns")
+verbList = countLines("verbs")
 
 def get_objects(parsed, pos):
     # Get objeccts for given pos 
@@ -128,13 +128,19 @@ def makeCouplet(subject, tagger):
 """
 def main():
     # Gather training data and train tagger, making TrigramTagger
+    noLoop = 0
     while(1):
         phrase = input("Enter rap phrase: ")
         while(1):
+            if(noLoop == 20):
+                print("Max word range hit, stopping infinite loop")
+                noLoop = 0
+                break
             pos = random.randint(0,1) 
             objects = identify_objects(phrase, trigram_tagger, pos) 
             print("objects: " + str(objects))
             if objects == []:
+                noLoop = noLoop + 1
                 print("Couldn't find any POS for that one")
                 continue
             subject = objects[0]
