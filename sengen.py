@@ -38,6 +38,7 @@ api = datamuse.Datamuse()
 
 
 def makeSentence(cfg):
+def makeSentenceWithNoun(cfg):
     word = cfg.sentence
     if(cfg.isNoun == True):
 
@@ -46,6 +47,9 @@ def makeSentence(cfg):
         cfg.sentence = "I'll " + verbPhrase + " " + pronoun + " " + word
 
     return cfg.sentence
+
+def makeSentenceWithVerb(cfg):
+    pass
 
 def makeCouplet(word):
     sentence = word
